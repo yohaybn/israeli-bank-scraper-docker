@@ -1,0 +1,13 @@
+{
+  "name": "israeli-bank-scraper-api",
+  "version": "1.0.0",
+  "description": "Pure JS REST API for Israeli Bank Scraper",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "israeli-bank-scrapers": "^6.7.8"
+  }
+}
