@@ -1,49 +1,19 @@
-FROM node:20-slim
-
-# Install system dependencies required for headless Chromium
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    fonts-liberation \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libc6 \
-    libcairo2 \
-    libcups2 \
-    libdbus-1-3 \
-    libexpat1 \
-    libfontconfig1 \
-    libgbm1 \
-    libgcc1 \
-    libglib2.0-0 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libstdc++6 \
-    libx11-6 \
-    libx11-xcb1 \
-    libxcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libext6 \
-    libxfixes3 \
-    libxi6 \
-    libxrandr2 \
-    libxrender1 \
-    libxss1 \
-    libxtst6 \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+FROM node:24-slim
 
 WORKDIR /app
+
+# Install standard curl/ca-certificates first so Puppeteer can download binaries securely
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY package.json ./
 RUN npm install
 
-# Download and cache the correct Chromium binary for the target architecture
-RUN npx puppeteer browsers install chrome
+# This command downloads Chromium AND automatically sets up 
+# all modern system dependencies required to run it headless!
+RUN npx puppeteer browsers install chrome --with-deps
 
 COPY server.js ./
 
