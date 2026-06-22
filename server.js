@@ -1,17 +1,30 @@
 const express = require('express');
-const { createScraper } = require('israeli-bank-scrapers');
+const {
+    createScraper
+} = require('israeli-bank-scrapers');
 
 const app = express();
 app.use(express.json());
 
 app.post('/scrape', async (req, res) => {
     try {
+
         const config = req.body;
-        const { credentials, ...options } = config;
+        const {
+            credentials,
+            ...options
+        } = config;
 
         if (!options.companyId || !credentials) {
-            return res.status(400).json({ error: "Missing required companyId or credentials keys." });
+            return res.status(400).json({
+                error: "Missing required companyId or credentials keys."
+            });
         }
+
+        // Force the scraper to use the container's native multi-arch Chromium binary
+        options.browserArgs = options.browserArgs || {};
+        options.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium';
+        options.args = [...(options.args || []), '--no-sandbox', '--disable-setuid-sandbox'];
 
         // Safely parse the startDate if it's passed as a string
         if (options.startDate && typeof options.startDate === 'string') {
@@ -20,11 +33,10 @@ app.post('/scrape', async (req, res) => {
 
         const scraper = createScraper(options);
         const scrapeResult = await scraper.scrape(credentials);
-
         if (!scrapeResult.success) {
-            return res.status(500).json({ 
+            return res.status(500).json({
                 error: `Scrape execution unsuccessful: ${scrapeResult.errorType}`,
-                errorMessage: scrapeResult.errorMessage 
+                errorMessage: scrapeResult.errorMessage
             });
         }
 
@@ -32,7 +44,9 @@ app.post('/scrape', async (req, res) => {
         return res.json(scrapeResult.accounts);
 
     } catch (err) {
-        return res.status(500).json({ error: err.message });
+        return res.status(500).json({
+            error: err.message
+        });
     }
 });
 
