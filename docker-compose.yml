@@ -1,0 +1,9 @@
+services:
+  israeli-bank-scraper-api:
+    image: ghcr.io/yohaybn/israeli-bank-scraper-docker/israeli-bank-scraper-api:latest
+    container_name: israeli-bank-scraper-api
+    ports:
+      - "9203:9203"
+    environment:
+      - PORT=9203
+    restart: unless-stopped
