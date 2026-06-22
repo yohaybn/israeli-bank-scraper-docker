@@ -24,7 +24,23 @@ app.post('/scrape', async (req, res) => {
         // Force the scraper to use the container's native multi-arch Chromium binary
         options.browserArgs = options.browserArgs || {};
         options.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium';
-        options.args = [...(options.args || []), '--no-sandbox', '--disable-setuid-sandbox'];
+        options.args = [
+          ...(options.args || []),
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          // 1. Spoof a completely real, standard Windows Chrome browser user agent
+          '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          // 2. Set language headers so Israeli portals don't flag missing locale traits
+          '--lang=he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7',
+          // 3. Request standard desktop structural dimensions
+          '--window-size=1920,1080'
+        ];
+        
+        // 4. Force default viewports to emulate full desktop resolutions 
+        options.defaultViewport = {
+          width: 1920,
+          height: 1080
+        };
 
         // Safely parse the startDate if it's passed as a string
         if (options.startDate && typeof options.startDate === 'string') {
